@@ -25,7 +25,7 @@ def decrypt_AES(key, nonce, ciphertext,tag):
 
 if __name__ == "__main__":
     key = padding("khanh")
-    n,c,t = encry_AES(key,"khanhnggu")
+    n,c,t = encry_AES(key,"khanh")
     print(c);
     p = decrypt_AES(key,n,c,t)
     if not p:

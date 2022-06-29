@@ -2,12 +2,14 @@ from cProfile import Profile
 from concurrent.futures import process
 from msilib.schema import File
 from tkinter import *
+from tkinter import filedialog
 import tkinter.messagebox as tkMessageBox
 from functools import partial
 import sqlite3
 from tokenize import String
 from turtle import left
-
+from tkinter import filedialog as fd
+from tkinter.messagebox import showinfo
 from numpy import size
 global root
 
@@ -99,7 +101,7 @@ def RegisterForm():
     lbl_login.bind('<Button-1>', toLogin)
     
 def HomeForm():
-    global  HomeFrame,list_box
+    global  HomeFrame,list_box,fileNames
     name = "khanh"
     HomeFrame = Frame(root)
     HomeFrame.pack(side=TOP,pady= 80)
@@ -110,19 +112,14 @@ def HomeForm():
     lbl_edit.grid(row=1,column=0)
     lbl_edit.bind('<Button-1>', toEdit)
     
-    usename_reciver = Label(HomeFrame, text="From email:", font=('arial', 12))
+    usename_reciver = Label(HomeFrame, text="to email:", font=('arial', 12))
     usename_reciver.grid(row=0,column=2)
     
-    
-    fileToSend = Label(HomeFrame, text="File to Send", font=('arial', 12))
-    fileToSend.grid(row=1,column=2)
     
     Entry_reciver = Entry(HomeFrame, font=('arial', 12),textvariable=from_Name, width=15)
     Entry_reciver.grid(row=0, column=3)
     
-    EntrySend = Entry(HomeFrame, font=('arial', 12),textvariable=file_Send, width=15)
-    EntrySend.grid(row=1, column=3)
-    sendButton = Button(HomeFrame,text="SEND",command=ProcessSend,font= 8).grid(row=3,column=2)
+    open_button = Button(HomeFrame,text='Open Files',command=select_files).grid(row=1,column=2)
     
     my_file = Label(HomeFrame,text="My File",fg="Red",font= 11)
     my_file.grid(row=7,column=2)
@@ -161,7 +158,7 @@ def EditForm():
     Entrylastname = Entry(EditFrame, font=('arial', 12), textvariable=password2, width=15)
     Entrylastname.grid(row=6, column=1)
     
-    btn_login = Button(EditFrame, text="save", font=('arial', 12), width=35, command=processSave)
+    btn_login = Button(EditFrame, text="save", font=('arial', 12), width=35, command=processUpdateInformation)
     btn_login.grid(row=7, columnspan=2, pady=20)
     
     lbl_login = Label(EditFrame, text="Home", fg="Blue", font=('arial', 12))
@@ -169,16 +166,29 @@ def EditForm():
     lbl_login.bind('<Button-1>', ToHome)
 
 #process
+def select_files():
+    filetypes = (
+        ('text files', '*.txt'),
+        ('All files', '*.*')
+    )
 
-def processSave():
+    filenames = fd.askopenfilenames(
+        title='Open files',
+        initialdir='/',
+        filetypes=filetypes)
+
+    showinfo(
+        title='Selected Files',
+        message=filenames
+    )
+    
+def processUpdateInformation():
     pass
 
 def ProcessOpen():
     filename = list_box.get(ANCHOR)
     print(filename)
     
-def ProcessSend():
-    pass
     
 def Register():
     e = email1.get()
