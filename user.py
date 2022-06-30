@@ -5,14 +5,13 @@ from tkinter import *
 from tkinter import filedialog
 import tkinter.messagebox as tkMessageBox
 from functools import partial
-import sqlite3
 from tokenize import String
 from turtle import left
 from tkinter import filedialog as fd
 from tkinter.messagebox import showinfo
 from numpy import size
 global root
-
+import FunctionSQL as s
 
 def loginForm():
     global  LoginFrame, lbl_result1
@@ -69,11 +68,11 @@ def RegisterForm():
         tem = Label(RegisterFrame, text=list_infor[i], font=('arial', 12), bd=12)
         tem.grid(row=i+1)
     
-    # lbl_result2 = Label(RegisterFrame, text="", font=('arial',12))
-    # lbl_result2.grid(row=7, columnspan=2)
+    lbl_result2 = Label(RegisterFrame, text="", font=('arial',12))
+    lbl_result2.grid(row=7, columnspan=2)
     
-    # lbl_result3 = Label(RegisterFrame, text="", font=('arial',12))
-    # lbl_result3.grid(row=7, column=2)
+    lbl_result3 = Label(RegisterFrame, text="", font=('arial',12))
+    lbl_result3.grid(row=7, column=2)
     
     Entryusername = Entry(RegisterFrame, font=('arial', 12),textvariable=email1, width=15)
     Entryusername.grid(row=1, column=1)
