@@ -45,19 +45,19 @@ def loginForm():
     LoginFrame.pack(side=TOP,pady= 80)
     
     usernameLabel = Label(LoginFrame, text="Email:",font= 12).grid(row=0, column=0)
-    usernameEntry = Entry(LoginFrame, textvariable=email,font= 12).grid(row=0, column=2)  
+    usernameEntry = Entry(LoginFrame, textvariable=email,font= 12).grid(row=0, column=1)  
     
     #password label and password entry box
     passwordLabel = Label(LoginFrame,text="Password:",font= 12).grid(row=2, column=0)  
-    passwordEntry = Entry(LoginFrame, textvariable=password,show='*',font= 12).grid(row=2, column=2)
+    passwordEntry = Entry(LoginFrame, textvariable=password,show='*',font= 12).grid(row=2, column=1)
     
     #login button
-    lbl_result1 = Label(LoginFrame, text="", font=('arial', 12))
-    lbl_result1.grid(row=4, columnspan=2)
-    loginButton = Button(LoginFrame, text="Login", command=validateLogin,font= 12).grid(row=4, column=1)
+    lbl_result1 = Label(LoginFrame, text="", font=('arial', 11))
+    lbl_result1.grid(row=4, columnspan=3)
+    loginButton = Button(LoginFrame, text="Login", command=validateLogin,font= 12).grid(row=5, column=1)
     
     lbl_register = Label(LoginFrame, text="Register", fg="Blue", font=('arial', 12))
-    lbl_register.grid(row=5,column=1)
+    lbl_register.grid(row=6,column=1)
     lbl_register.bind('<Button-1>', toRegister)
 
 def RegisterForm():
@@ -101,6 +101,7 @@ def RegisterForm():
     lbl_login.bind('<Button-1>', toLogin)
     
 def HomeForm():
+    
     global  HomeFrame,list_box,fileNames
     name = "khanh"
     HomeFrame = Frame(root)
@@ -108,7 +109,7 @@ def HomeForm():
     
     filename_lasname = Label(HomeFrame, text=name ,font= 12).grid(row=0, column=0)
     
-    lbl_edit = Label(HomeFrame, text="Edit_Information", fg="Blue", font=('arial',8))
+    lbl_edit = Label(HomeFrame, text="Edit_Information", fg="Blue", font=('arial',10))
     lbl_edit.grid(row=1,column=0)
     lbl_edit.bind('<Button-1>', toEdit)
     
@@ -210,7 +211,7 @@ def validateLogin():
         LoginFrame.destroy()
         HomeForm()
     else:
-        print("sai")
+        lbl_result1.config(text=" Invalid e-mail or password. ", fg="red")
         
 #move frame
 def ToHome(event =None):
