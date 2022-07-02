@@ -183,7 +183,12 @@ def select_files():
     )
     
 def processUpdateInformation():
-    pass
+    e = email2.get()
+    n = name2.get()
+    pws = password2.get()
+    b = birthday2.get()
+    ph =  phone2.get()
+    add = address2.get()
 
 def ProcessOpen():
     filename = list_box.get(ANCHOR)
