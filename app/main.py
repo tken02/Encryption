@@ -5,6 +5,8 @@ from tkinter.filedialog import askopenfile
 import sig as digitalsign
 from tkinter import messagebox
 
+global pubK, priK
+pubK,priK= digitalsign.generate_key()
 LARGEFONT =("Verdana", 15)
 
 class tkinterApp(tk.Tk):
@@ -65,8 +67,10 @@ class SignPage(tk.Frame):
 		# by using grid
 		button1.grid(row = 1, column = 1, padx = 10, pady = 10)
 		def upload_file():
+			print(pubK)
+
 			file = filedialog.askopenfilename()
-			print(file)
+			# print(file)
 			if digitalsign.signSHA256(file,priK):
 				messagebox.showinfo("showinfo", "Success")
 			else:
@@ -90,16 +94,42 @@ class VerifyPage(tk.Frame):
 		l1.grid(row=1,column=3)
 		b1 = tk.Button(self, text='Upload File', 
 		width=20,command = lambda:upload_file())
-		b1.grid(row=2,column=1) 
+		b1.grid(row=2,column=1)
+
+		b2 = tk.Button(self, text='Upload sign file', 
+		width=20,command = lambda:upload_signfile())
+		b2.grid(row=3,column=1)
+
+		global filepath
+		filepath = tk.StringVar()
+		global signpath
+		signpath = tk.StringVar() 
+
 		def upload_file():
-			file = filedialog.askopenfilenames()
-			print(file)
-			# if digitalsign.signSHA256(file,priK):
-			# 	messagebox.showinfo("showinfo", "Success")
-			# else:
-			# 	messagebox.showerror("showerror", "Error")
-		# button to show frame 2 with text
-		# layout2
+			filename = filedialog.askopenfilename()
+			filepath.set(filename)
+		def upload_signfile():
+			signname = filedialog.askopenfilename()
+			signpath.set(signname)
+
+		b3 = tk.Button(self, text='Verify', 
+		width=20,command = lambda:verify())
+		b3.grid(row=4,column=1)
+		def verify():
+			print(pubK)
+			# print(filepath.get(),signpath.get())
+			verified, user =digitalsign.verifySign(filepath.get(),signpath.get(),pubK)
+			if verified:
+				messagebox.showinfo("showinfo", "Success, user veirifed is " + user)
+			else:
+				messagebox.showerror("Error", "the find not match for any user")
+
+		
+
+		l2 = ttk.Label(self,textvariable=filepath)  
+		l2.grid(row=2,column=2)
+		l3 = ttk.Label(self,textvariable=signpath)  
+		l3.grid(row=3,column=2)
 		button1 = ttk.Button(self, text ="SignPage",
 							command = lambda : controller.show_frame(SignPage))
 	
@@ -114,6 +144,5 @@ class VerifyPage(tk.Frame):
 
 
 # Driver Code
-# pubK,priK= digitalsign.generate_key()
 app = tkinterApp()
 app.mainloop()

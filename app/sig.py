@@ -9,11 +9,14 @@ def generate_key():
     return pub_key, pr_key
 def signSHA256(filepath,privateKey):
     signFile = filepath.split('/')[-1]
+    outputPath = filepath.replace(filepath.split('/')[-1],signFile+'.sig')
+    # print(outputPath)
     try:
         with open(filepath, "rb") as image_file:
             encoded_string = base64.b64encode(image_file.read())
         sign = rsa.sign(encoded_string, privateKey, 'SHA-256')
-        file = open(signFile+'.sig','wb')
+        print('sign',sign)
+        file = open(outputPath,'wb')
         file.write(sign)
         file.close()
         return True
@@ -21,18 +24,34 @@ def signSHA256(filepath,privateKey):
         return False
 
 def verifySign(filepath,signpath,publicKey):
-    with open("a.txt", "rb") as image_file:
-        encoded_string = base64.b64encode(image_file.read())
-    file = open('a.txt.sig','rb')
-    sign = file.read()
-    try:
-        rsa.verify(encoded_string, sign, pubK)
-        return True
-    except:
-        print('not valid')
-        return False
+    print(publicKey)
+    # print('p',filepath)
+    # print('s',signpath)
+    p1,k1 = generate_key()
+    p2,k2 = generate_key()
+    p3,k3 = generate_key()
+    p4,k4 = generate_key()
+    list_user = {
+        'user1' : p1,
+        'user2' : p2,
+        'user3' : p3,
+        'teo' : publicKey
+    }
 
-pubK,priK= generate_key()
+    with open(filepath, "rb") as image_file:
+        encoded_string = base64.b64encode(image_file.read())
+    file = open(signpath,'rb')
+    sign = file.read()
+    # print('sign',sign)
+    for user in list_user:
+        # print(user,user.values())
+        try:
+            rsa.verify(encoded_string, sign,list_user[user])
+            return True, user
+        except:
+            continue
+    return False, ''
+
 # print('pubK',pubK)
 # print('priK',priK)
 # signSHA256('',priK)
