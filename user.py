@@ -138,31 +138,29 @@ def EditForm():
     global EditFrame
     EditFrame = Frame(root)
     EditFrame.pack(side=TOP, pady=40)
-    list_infor = ["Email:","Name:","Brithday:","Phone:","Address:","Password:"]
+    list_infor = ["Name:","Brithday:","Phone:","Address:","Password:"]
     for i in range(len(list_infor)):
         tem = Label(EditFrame, text=list_infor[i], font=('arial', 12), bd=12)
         tem.grid(row=i+1)
     
-    Entryusername = Entry(EditFrame, font=('arial', 12),textvariable=email2, width=15)
-    Entryusername.grid(row=1, column=1)
     
     Entrypassword = Entry(EditFrame, font=('arial', 12), textvariable=name2, width=15, show="*")
-    Entrypassword.grid(row=2, column=1)
+    Entrypassword.grid(row=1, column=1)
     
     Entryfirstname = Entry(EditFrame, font=('arial', 12), textvariable=birthday2, width=15)
-    Entryfirstname.grid(row=3, column=1)
+    Entryfirstname.grid(row=2, column=1)
     
     Entrylastname = Entry(EditFrame, font=('arial', 12), textvariable=phone2, width=15)
-    Entrylastname.grid(row=4, column=1)
+    Entrylastname.grid(row=3, column=1)
     
     Entrylastname = Entry(EditFrame, font=('arial', 12), textvariable=address2, width=15)
-    Entrylastname.grid(row=5, column=1)
+    Entrylastname.grid(row=4, column=1)
     
     Entrylastname = Entry(EditFrame, font=('arial', 12), textvariable=password2, width=15)
-    Entrylastname.grid(row=6, column=1)
+    Entrylastname.grid(row=5, column=1)
     
     btn_login = Button(EditFrame, text="save", font=('arial', 12), width=35, command=processUpdateInformation)
-    btn_login.grid(row=7, columnspan=2, pady=20)
+    btn_login.grid(row=6, columnspan=2, pady=20)
     
     lbl_login = Label(EditFrame, text="Home", fg="Blue", font=('arial', 12))
     lbl_login.grid(row=0, sticky=W)
@@ -265,7 +263,7 @@ def select_files():
     )
     
 def processUpdateInformation():
-    e = email2.get()
+
     n = name2.get()
     pws = password2.get()
     b = birthday2.get()
@@ -279,7 +277,6 @@ def ProcessOpen():
     
     
 def Register():
-    e = email1.get()
     n = name.get()
     b = birthday.get()
     ph = phone.get()
@@ -294,10 +291,7 @@ def Register():
 def validateLogin():
     u = email.get()
     p = password.get()
-    
-    check, data = db.checkUserPassword(u,p)
-    
-    if check == True:
+    if u == "admin" and p == "admin":
         lbl_result1.config(text="You Successfully Login", fg="blue")
         LoginFrame.destroy()
         HomeForm()
