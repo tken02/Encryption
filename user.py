@@ -1,16 +1,19 @@
 from cProfile import Profile
 from concurrent.futures import process
+from fileinput import filename
 from tkinter import *
 import tkinter.messagebox as messagebox
 from functools import partial
 from tokenize import String
-from tkinter import filedialog as fd
 from tkinter import filedialog
 from tkinter.messagebox import showinfo
 from app import sig as digitalsign
 import FunctionSQL as s
 import db_connect as db
+import encry_decry_file as file
+import RSA as cr
 global root
+
 LARGEFONT =("Verdana", 15)
 
 def loginForm():
@@ -18,9 +21,9 @@ def loginForm():
     global email, password
     global email1, password1, name, birthday, phone, address
     global email2, password2, name2, birthday2, phone2, address2
-    global from_Name, file_Send
+    global to_Name, file_Send
     
-    from_Name = StringVar()
+    to_Name = StringVar()
     file_Send = StringVar()
     
     email = StringVar()
@@ -53,9 +56,9 @@ def loginForm():
     #login button
     lbl_result1 = Label(LoginFrame, text="", font=('arial', 11))
     lbl_result1.grid(row=4, columnspan=3)
-    loginButton = Button(LoginFrame, text="Login", command=validateLogin,font= 12).grid(row=5, column=1)
+    loginButton = Button(LoginFrame, text="LOGIN", command=validateLogin,font= 12).grid(row=5, column=1)
     
-    lbl_register = Label(LoginFrame, text="Register", fg="Blue", font=('arial', 12))
+    lbl_register = Label(LoginFrame, text="REGINTER", fg="Blue", font=('arial', 12))
     lbl_register.grid(row=6,column=1)
     lbl_register.bind('<Button-1>', toRegister)
 
@@ -101,30 +104,41 @@ def RegisterForm():
     
 def HomeForm():
     global  HomeFrame,list_box,fileNames
+    global PubK,data,Kpri
+    #set data public_key and pravate from database
+    
+    PubK,Kpri = cr.generate_key()
+    fileNames = StringVar()
+    
     name = "khanh"
     HomeFrame = Frame(root)
     HomeFrame.pack(side=TOP,pady= 80)
     
     filename_lasname = Label(HomeFrame, text=name ,font= 12).grid(row=0, column=0)
     
-    lbl_edit = Label(HomeFrame, text="Edit_Information", fg="Blue", font=('arial',10))
+    # button information
+    lbl_edit = Label(HomeFrame, text="EDIT INFORMATION", fg="Blue", font=('arial',11))
     lbl_edit.grid(row=1,column=0)
     lbl_edit.bind('<Button-1>', toEdit)
     
-    l2 = Label(HomeFrame, text="SignDigital & VeriFy", fg="Blue", font=('arial',10))
+    #button signture & verify
+    l2 = Label(HomeFrame, text="DIGITAL SIGNATURE & VERIFY", fg="Blue", font=('arial',11))
     l2.grid(row=2,column=0)
     l2.bind('<Button-1>', ToSignDigital)
+    
+    #logout
+    buttonLogout = Button(HomeFrame,text='LOGOUT',command = toLogin1).grid(row=3,column=0)
         
-    usename_reciver = Label(HomeFrame, text="To email:", font=('arial', 12))
+    usename_reciver = Label(HomeFrame, text="To Email:", font=('arial', 12))
     usename_reciver.grid(row=0,column=2)
     
     
-    Entry_reciver = Entry(HomeFrame, font=('arial', 12),textvariable=from_Name, width=15)
+    Entry_reciver = Entry(HomeFrame, font=('arial', 12),textvariable=to_Name, width=15)
     Entry_reciver.grid(row=0, column=3)
+    open_button = Button(HomeFrame,text='Open File',command=select_files).grid(row=1,column=2)
+    send_button = Button(HomeFrame,text='SEND',command = send_file).grid(row=2,column=2)
     
-    open_button = Button(HomeFrame,text='Open Files',command=select_files).grid(row=1,column=2)
-    
-    my_file = Label(HomeFrame,text="My File",fg="Red",font= 11)
+    my_file = Label(HomeFrame,text="MY FILE",fg="Red",font= 11)
     my_file.grid(row=7,column=2)
     
     list_box = Listbox(HomeFrame)
@@ -132,7 +146,9 @@ def HomeForm():
     list_NAME = ["1","2"]
     for i in list_NAME:
         list_box.insert(END,i)
-    button_open = Button(HomeFrame,text="open",command=ProcessOpen,font= 8).grid(row=8,column=3)
+        
+    button_open = Button(HomeFrame,text="OPEN",
+                         command=ProcessOpen,font= 8).grid(row=8,column=3)
       
 def EditForm():
     global EditFrame
@@ -170,6 +186,11 @@ def SignDigtalForm():
     global SignDigtalFrame,priK
     SignDigtalFrame = Frame(root)
     SignDigtalFrame.pack(side=TOP, pady=40)
+    
+    #move to Home Frame
+    l = Label(SignDigtalFrame, text="Home", fg="Blue", font=('arial', 12))
+    l.grid(row=0, sticky=W)
+    l.bind('<Button-1>', ToHome2)
     
     l1 = Label(SignDigtalFrame,text='Upload File & sign',width=30,font=LARGEFONT)  
     l1.grid(row=1,column=3)
@@ -247,33 +268,36 @@ def VerifyFrom():
     
 #process
 def select_files():
-    filetypes = (
-        ('text files', '*.txt'),
-        ('All files', '*.*')
-    )
+    filenames = filedialog.askopenfilename()
+    fileNames.set(filenames)
 
-    filenames = fd.askopenfilenames(
-        title='Open files',
-        initialdir='/',
-        filetypes=filetypes)
-
-    showinfo(
-        title='Selected Files',
-        message=filenames
-    )
+def send_file():
+    Path = fileNames.get()
+    toName = to_Name.get()
+    print(Path)
+    FILE_NAME_SEND = Path.split('/')[-1]
+    data_ciphertext = file.encry_file(Path,PubK)
+    print(data_ciphertext)
+    print(FILE_NAME_SEND)
+    #save data_ciphertext for reciver (nguoi nhan)
     
-def processUpdateInformation():
 
+def processUpdateInformation():
     n = name2.get()
     pws = password2.get()
     b = birthday2.get()
     ph =  phone2.get()
     add = address2.get()
     
-
+#paramiter data is data on data of user in spl
 def ProcessOpen():
     filename = list_box.get(ANCHOR)
-    print(filename)
+    #set data, Kpri is private key
+    # data_set is date on database
+    data_set = data
+    Plaintext = file.decry_file(data_set,Kpri)
+    with open(filename, "wb") as binary_file:
+	    binary_file.write(Plaintext)
     
     
 def Register():
@@ -307,7 +331,6 @@ def toLogin(event = None):
     RegisterFrame.destroy()
     loginForm()
     
-
 def toRegister(event = None):
     LoginFrame.destroy()
     RegisterForm()
@@ -320,11 +343,17 @@ def ToSignDigital(event = None):
         HomeFrame.destroy()
         SignDigtalForm()
 
+def ToHome2(event = None):
+        SignDigtalFrame.destroy()
+        HomeForm()
+    
+def toLogin1(event = None):
+    HomeFrame.destroy()
+    loginForm()
+
 if __name__ == "__main__":
     root = Tk() 
     root.title('Login Form')
     root.geometry('900x500')
     loginForm()
     root.mainloop()
-    
-    
