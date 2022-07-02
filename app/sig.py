@@ -7,6 +7,7 @@ import base64
 def generate_key():
     pub_key, pr_key = rsa.newkeys(1024)
     return pub_key, pr_key
+
 def signSHA256(filepath,privateKey):
     signFile = filepath.split('/')[-1]
     outputPath = filepath.replace(filepath.split('/')[-1],signFile+'.sig')
