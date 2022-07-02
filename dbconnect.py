@@ -11,5 +11,5 @@ connect = pyodbc.connect(
 insert = connect.cursor()
 insert.execute("SELECT * FROM USERINFO")
 tables = insert.fetchall()
-data = tables[0][0]
+data = tables[3][0]
 print(data)

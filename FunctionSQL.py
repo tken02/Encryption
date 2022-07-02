@@ -1,5 +1,5 @@
-import pyodbc
-import connect_db as db
+
+import db_connect as db
 from Crypto.Hash import SHA256
 import gen_key
 
@@ -14,7 +14,7 @@ def signUp(email, name, dOBird, address, phone, password):
     nonce = '0x' + nonce.hex()
     db.insertUser(email, name, dOBird, address, phone, passwordHash, priKey, nonce, publicKey, salt)
 
-
+#signUp("khanhnu","khanh","02/01/2001","tnkay",103108391,"12345")
 def signIn(email, password ):
     password_salt = password + '_ANMT_' + db.getSalt(email)
     password_hash = hex(int(SHA256.new(password_salt.encode('utf-8')).hexdigest(), 16))
