@@ -2,6 +2,10 @@ import hashlib
 from turtle import end_fill
 import rsa
 import base64
+from Crypto.Cipher import AES, PKCS1_OAEP
+from Crypto.PublicKey import RSA
+from Crypto.Hash import SHA256
+from Crypto.Signature import pkcs1_15
 
 #RSA:
 def generate_key():
@@ -14,8 +18,12 @@ def signSHA256(filepath,privateKey):
     # print(outputPath)
     try:
         with open(filepath, "rb") as image_file:
-            encoded_string = base64.b64encode(image_file.read())
-        sign = rsa.sign(encoded_string, privateKey, 'SHA-256')
+            encoded_string = image_file.read()
+        # print(hashFILE)
+        cipher_rsa = RSA.import_key(privateKey)
+        hashFILE = SHA256.new(encoded_string)
+        sign = pkcs1_15.new(cipher_rsa).sign(hashFILE)
+        
         print('sign',sign)
         file = open(outputPath,'wb')
         file.write(sign)
@@ -24,33 +32,28 @@ def signSHA256(filepath,privateKey):
     except:
         return False
 
-def verifySign(filepath,signpath,publicKey):
-    print(publicKey)
-    # print('p',filepath)
-    # print('s',signpath)
-    p1,k1 = generate_key()
-    p2,k2 = generate_key()
-    p3,k3 = generate_key()
-    p4,k4 = generate_key()
-    list_user = {
-        'user1' : p1,
-        'user2' : p2,
-        'user3' : p3,
-        'teo' : publicKey
-    }
-
+def verifySign(filepath,signpath, data_email_publicK):
+    list_user = {}
+    for i in  range(len(data_email_publicK)):
+        list_user[data_email_publicK[i][0]] =  data_email_publicK[i][1]
+    
+    print(list_user)
     with open(filepath, "rb") as image_file:
-        encoded_string = base64.b64encode(image_file.read())
+        encoded_string = image_file.read()
+    
+    hashFILE = SHA256.new(encoded_string)
+    print(hashFILE)
     file = open(signpath,'rb')
     sign = file.read()
+    file.close()
     # print('sign',sign)
     for user in list_user:
-        # print(user,user.values())
+        cipher_rsa = RSA.import_key(list_user[user])
         try:
-            rsa.verify(encoded_string, sign,list_user[user])
-            return True, user
-        except:
-            continue
+            pkcs1_15.new(cipher_rsa).verify(hashFILE,sign)
+            return True,user
+        except (ValueError, TypeError):
+            continue    
     return False, ''
 
 # print('pubK',pubK)

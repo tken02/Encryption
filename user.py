@@ -13,6 +13,9 @@ import db_connect as db
 import encry_decry_file as file
 import RSA as cr
 global root
+import gen_key as gen
+from Crypto.Cipher import PKCS1_OAEP
+from Crypto.PublicKey import RSA
 
 LARGEFONT =("Verdana", 15)
 
@@ -63,7 +66,7 @@ def loginForm():
     lbl_register.bind('<Button-1>', toRegister)
 
 def RegisterForm():
-    global RegisterFrame, lbl_result3,  lbl_result2
+    global RegisterFrame, lbl_result3,  lbl_result2, l1_succses
     RegisterFrame = Frame(root)
     RegisterFrame.pack(side=TOP, pady=40)
     list_infor = ["Email:","Name:","Brithday:","Phone:","Address:","Password:"]
@@ -80,7 +83,7 @@ def RegisterForm():
     Entryusername = Entry(RegisterFrame, font=('arial', 12),textvariable=email1, width=15)
     Entryusername.grid(row=1, column=1)
     
-    Entrypassword = Entry(RegisterFrame, font=('arial', 12), textvariable=name, width=15, show="*")
+    Entrypassword = Entry(RegisterFrame, font=('arial', 12), textvariable=name, width=15)
     Entrypassword.grid(row=2, column=1)
     
     Entryfirstname = Entry(RegisterFrame, font=('arial', 12), textvariable=birthday, width=15)
@@ -98,6 +101,9 @@ def RegisterForm():
     btn_login = Button(RegisterFrame, text="Register", font=('arial', 12), width=35, command=Register)
     btn_login.grid(row=7, columnspan=2, pady=20)
     
+    l1_succses = Label(RegisterFrame, text="", font=('arial',12))
+    l1_succses.grid(row=8, columnspan=2)
+    
     lbl_login = Label(RegisterFrame, text="Login", fg="Blue", font=('arial', 12))
     lbl_login.grid(row=0, sticky=W)
     lbl_login.bind('<Button-1>', toLogin)
@@ -106,28 +112,22 @@ def HomeForm():
     global  HomeFrame,list_box,fileNames
     global PubK,data,Kpri
     #set data public_key and pravate from database
-    
-    PubK,Kpri = cr.generate_key()
+    # PubK,Kpri = cr.generate_key()
     fileNames = StringVar()
     
-    name = "khanh"
+    name = data[0][0]
     HomeFrame = Frame(root)
     HomeFrame.pack(side=TOP,pady= 80)
     
     filename_lasname = Label(HomeFrame, text=name ,font= 12).grid(row=0, column=0)
     
-    # button information
     lbl_edit = Label(HomeFrame, text="EDIT INFORMATION", fg="Blue", font=('arial',11))
     lbl_edit.grid(row=1,column=0)
     lbl_edit.bind('<Button-1>', toEdit)
     
-    #button signture & verify
     l2 = Label(HomeFrame, text="DIGITAL SIGNATURE & VERIFY", fg="Blue", font=('arial',11))
     l2.grid(row=2,column=0)
     l2.bind('<Button-1>', ToSignDigital)
-    
-    #logout
-    buttonLogout = Button(HomeFrame,text='LOGOUT',command = toLogin1).grid(row=3,column=0)
         
     usename_reciver = Label(HomeFrame, text="To Email:", font=('arial', 12))
     usename_reciver.grid(row=0,column=2)
@@ -138,12 +138,19 @@ def HomeForm():
     open_button = Button(HomeFrame,text='Open File',command=select_files).grid(row=1,column=2)
     send_button = Button(HomeFrame,text='SEND',command = send_file).grid(row=2,column=2)
     
+    #logout
+    buttonLogout = Button(HomeFrame,text='LOGOUT',command = toLogin1).grid(row=3,column=0)
+    
     my_file = Label(HomeFrame,text="MY FILE",fg="Red",font= 11)
     my_file.grid(row=7,column=2)
     
     list_box = Listbox(HomeFrame)
     list_box.grid(row=8,column=2)
-    list_NAME = ["1","2"]
+    
+    list_NAME = []
+    listfile = db.getListFile(data[0][0])
+    for i in listfile:
+        list_NAME.append(i[0])
     for i in list_NAME:
         list_box.insert(END,i)
         
@@ -151,7 +158,7 @@ def HomeForm():
                          command=ProcessOpen,font= 8).grid(row=8,column=3)
       
 def EditForm():
-    global EditFrame
+    global EditFrame,l2_succses
     EditFrame = Frame(root)
     EditFrame.pack(side=TOP, pady=40)
     list_infor = ["Name:","Brithday:","Phone:","Address:","Password:"]
@@ -160,7 +167,7 @@ def EditForm():
         tem.grid(row=i+1)
     
     
-    Entrypassword = Entry(EditFrame, font=('arial', 12), textvariable=name2, width=15, show="*")
+    Entrypassword = Entry(EditFrame, font=('arial', 12), textvariable=name2, width=15)
     Entrypassword.grid(row=1, column=1)
     
     Entryfirstname = Entry(EditFrame, font=('arial', 12), textvariable=birthday2, width=15)
@@ -172,11 +179,14 @@ def EditForm():
     Entrylastname = Entry(EditFrame, font=('arial', 12), textvariable=address2, width=15)
     Entrylastname.grid(row=4, column=1)
     
-    Entrylastname = Entry(EditFrame, font=('arial', 12), textvariable=password2, width=15)
+    Entrylastname = Entry(EditFrame, font=('arial', 12), textvariable=password, width=15)
     Entrylastname.grid(row=5, column=1)
     
     btn_login = Button(EditFrame, text="save", font=('arial', 12), width=35, command=processUpdateInformation)
     btn_login.grid(row=6, columnspan=2, pady=20)
+    
+    l2_succses = Label(EditFrame, text="", font=('arial',12))
+    l2_succses.grid(row=7, columnspan=2)
     
     lbl_login = Label(EditFrame, text="Home", fg="Blue", font=('arial', 12))
     lbl_login.grid(row=0, sticky=W)
@@ -204,11 +214,17 @@ def SignDigtalForm():
         VerifyFrom()
     # putting the button in its place
     # by using grid
+    Kpri = data[0][6]
+    nonce = data[0][7]
+    priKey = gen.decryptKey(Kpri,str(password.get()),nonce)
+    print(priKey)
+   
+    
     button1.grid(row = 1, column = 1, padx = 10, pady = 10)
+    
     def upload_file():
         file = filedialog.askopenfilename()
-        # print(file)
-        if digitalsign.signSHA256(file,priK):
+        if digitalsign.signSHA256(file,priKey):
             messagebox.showinfo("showinfo", "Success")
         else:
             messagebox.showerror("showerror", "Error")
@@ -242,10 +258,10 @@ def VerifyFrom():
     b3 = Button(VerifyFrame, text='Verify', 
     width=20,command = lambda:verify())
     b3.grid(row=4,column=1)
+    data_email_publicK = db.getUserKey()
     def verify():
-        print(pubK)
         # print(filepath.get(),signpath.get())
-        verified, user =digitalsign.verifySign(filepath.get(),signpath.get(),pubK)
+        verified, user =digitalsign.verifySign(filepath.get(),signpath.get(),data_email_publicK)
         if verified:
             messagebox.showinfo("showinfo", "Success, user veirifed is " + user)
         else:
@@ -276,7 +292,12 @@ def send_file():
     toName = to_Name.get()
     print(Path)
     FILE_NAME_SEND = Path.split('/')[-1]
+    PubK = db.getPublicKey(toName)
     data_ciphertext = file.encry_file(Path,PubK)
+    if db.insertData(email=toName,tenfile=FILE_NAME_SEND,dulieu=data_ciphertext):
+        print("send success")
+    else:
+        print("send fail")
     print(data_ciphertext)
     print(FILE_NAME_SEND)
     #save data_ciphertext for reciver (nguoi nhan)
@@ -284,23 +305,36 @@ def send_file():
 
 def processUpdateInformation():
     n = name2.get()
-    pws = password2.get()
+    pws = password.get()
     b = birthday2.get()
     ph =  phone2.get()
     add = address2.get()
+    if s.updateInfo(data=data, email=data[0][0],name=n,dOBird=b, address=add, phone=int(ph),
+                    oldPass=passwordGlo, newPass=pws):
+        l2_succses.config(text="successlly", fg="blue")
+    else:
+        l2_succses.config(text="no successlly", fg="blue")
+        
     
 #paramiter data is data on data of user in spl
 def ProcessOpen():
     filename = list_box.get(ANCHOR)
     #set data, Kpri is private key
     # data_set is date on database
-    data_set = data
-    Plaintext = file.decry_file(data_set,Kpri)
+    data_set = db.getFileData(data[0][0],filename)
+    Kpri = data[0][6]
+    nonce = data[0][7]
+    priKey = gen.decryptKey(Kpri,str(password.get()),nonce)
+    print(password.get())
+    print(password.get())
+    print(priKey)
+    Plaintext = file.decry_file(data_set.decode('utf-8'),priKey)
     with open(filename, "wb") as binary_file:
 	    binary_file.write(Plaintext)
     
     
 def Register():
+    e = email1.get()
     n = name.get()
     b = birthday.get()
     ph = phone.get()
@@ -308,14 +342,20 @@ def Register():
     p = password1.get()
     if(len(p) > 16 or len(p) == 0):
         lbl_result3.config(text="false", fg="blue")
-        
     else:
-        lbl_result3.config(text="true", fg="blue")
+        if s.signUp(email=e, name=n, dOBird=b,address=add,phone=int(p),password=p):
+            l1_succses.config(text="successlly", fg="blue")
+        else:
+            l1_succses.config(text="no successlly", fg="blue")
+            
 
 def validateLogin():
     u = email.get()
-    p = password.get()
-    if u == "admin" and p == "admin":
+    global passwordGlo
+    passwordGlo = password.get()
+    global check, data
+    check, data = s.signIn(email=u, password=passwordGlo)
+    if check:
         lbl_result1.config(text="You Successfully Login", fg="blue")
         LoginFrame.destroy()
         HomeForm()
@@ -346,10 +386,11 @@ def ToSignDigital(event = None):
 def ToHome2(event = None):
         SignDigtalFrame.destroy()
         HomeForm()
-    
+
 def toLogin1(event = None):
     HomeFrame.destroy()
     loginForm()
+
 
 if __name__ == "__main__":
     root = Tk() 
@@ -357,3 +398,5 @@ if __name__ == "__main__":
     root.geometry('900x500')
     loginForm()
     root.mainloop()
+    
+    
